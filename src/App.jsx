@@ -1,9 +1,13 @@
+// App.jsx
 import React, { useEffect, useState } from 'react';
 import PostList from './components/PostList.jsx';
 import PostForm from './components/PostForm.jsx';
 
-// Define the API Base URL constant
-const API_BASE_URL = '/api/posts';
+// 1. Define a constant that uses an environment variable
+// In a production build, VITE_API_BASE_URL will be the full Render URL.
+// In a development build, it will likely be an empty string, allowing the relative path to work.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const POSTS_URL = `${API_BASE_URL}/api/posts`;
 
 export default function App() {
   const [posts, setPosts] = useState([]);
@@ -15,8 +19,8 @@ export default function App() {
     setLoading(true);
     setError('');
     try {
-      // Use the constant
-      const res = await fetch(API_BASE_URL);
+      // 2. Use the constant here
+      const res = await fetch(POSTS_URL);
       if (!res.ok) throw new Error('Failed to fetch posts');
       const data = await res.json();
       // Sort newest first
@@ -34,8 +38,8 @@ export default function App() {
   }, []);
 
   const handleCreate = async (post) => {
-    // Use the constant
-    const res = await fetch(API_BASE_URL, {
+    // 3. Use the constant here
+    const res = await fetch(POSTS_URL, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(post)
@@ -49,8 +53,8 @@ export default function App() {
   };
 
   const handleUpdate = async (id, updates) => {
-    // Use the constant to construct the URL
-    const res = await fetch(`${API_BASE_URL}/${id}`, {
+    // 4. Use the constant here
+    const res = await fetch(`${POSTS_URL}/${id}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(updates)
@@ -63,50 +67,15 @@ export default function App() {
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this post?')) return;
-    // Use the constant to construct the URL
-    const res = await fetch(`${API_BASE_URL}/${id}`, { method: 'DELETE' });
+    // 5. Use the constant here
+    const res = await fetch(`${POSTS_URL}/${id}`, { method: 'DELETE' });
     if (!res.ok) {
       alert('Failed to delete');
       return;
     }
     setPosts(prev => prev.filter(p => p.id !== id));
   };
-
-  return (
-    <div className="container">
-      <div className="header">
-        <h1>Facebook-like Posts</h1>
-        <div className="small-muted">Simple Vite + React UI</div>
-      </div>
-
-      <div className="card">
-        <h3 style={{marginTop:0}}>Create a post</h3>
-        <PostForm onSubmit={handleCreate} submitLabel="Post" />
-      </div>
-
-      {error && <div className="card" style={{borderLeft:'4px solid #ef4444', color:'#b91c1c'}}>{error}</div>}
-
-      {loading ? (
-        <div className="card small-muted">Loading posts...</div>
-      ) : (
-        <PostList
-          posts={posts}
-          onEdit={(p) => setEditing(p)}
-          onDelete={handleDelete}
-        />
-      )}
-
-      {editing && (
-        <div className="card">
-          <h3>Edit post</h3>
-          <PostForm
-            initial={editing}
-            onSubmit={(updates) => handleUpdate(editing.id, updates)}
-            onCancel={() => setEditing(null)}
-            submitLabel="Save"
-          />
-        </div>
-      )}
-    </div>
-  );
+  
+  // ... (rest of the component JSX)
+// ...
 }
