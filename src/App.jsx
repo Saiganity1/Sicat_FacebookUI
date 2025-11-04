@@ -2,6 +2,14 @@ import React, { useEffect, useState } from 'react';
 import PostList from './components/PostList.jsx';
 import PostForm from './components/PostForm.jsx';
 
+// DEFINE API CONSTANTS using the environment variable
+// In production, VITE_API_BASE_URL will be set to 'https://sicat-facebookui-api.onrender.com'
+// In development, it defaults to an empty string, allowing the relative path to work
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+
+// This creates the consistent full URL for all requests (e.g., 'https://.../api/posts' in prod)
+const POSTS_URL = `${API_BASE_URL}/api/posts`;
+
 export default function App() {
   const [posts, setPosts] = useState([]);
   const [editing, setEditing] = useState(null);
@@ -12,7 +20,8 @@ export default function App() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/posts');
+      // Use the consistent constant for fetching
+      const res = await fetch(POSTS_URL);
       if (!res.ok) throw new Error('Failed to fetch posts');
       const data = await res.json();
       // Sort newest first
@@ -30,7 +39,8 @@ export default function App() {
   }, []);
 
   const handleCreate = async (post) => {
-    const res = await fetch('https://sicat-facebookui-api.onrender.com/api/posts', {
+    // Use the consistent constant for creating
+    const res = await fetch(POSTS_URL, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(post)
@@ -44,7 +54,8 @@ export default function App() {
   };
 
   const handleUpdate = async (id, updates) => {
-    const res = await fetch(`/api/posts/${id}`, {
+    // Use the consistent constant for updating
+    const res = await fetch(`${POSTS_URL}/${id}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(updates)
@@ -57,7 +68,8 @@ export default function App() {
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this post?')) return;
-    const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+    // Use the consistent constant for deleting
+    const res = await fetch(`${POSTS_URL}/${id}`, { method: 'DELETE' });
     if (!res.ok) {
       alert('Failed to delete');
       return;
