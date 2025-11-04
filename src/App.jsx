@@ -2,11 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PostList from './components/PostList.jsx';
 import PostForm from './components/PostForm.jsx';
 
-// 1. DEFINE API CONSTANTS using the environment variable
-// VITE_API_BASE_URL will be 'https://sicat-facebookui-api.onrender.com' in production.
-// It will be an empty string in development, which lets your Vite proxy handle the routing.
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
-const POSTS_URL = `${API_BASE_URL}/api/posts`;
+const API_URL = "https://sicat-facebookapi.onrender.com/api/posts"; // ✅ your backend URL
 
 export default function App() {
   const [posts, setPosts] = useState([]);
@@ -18,12 +14,10 @@ export default function App() {
     setLoading(true);
     setError('');
     try {
-      // 2. Use the consistent constant
-      const res = await fetch(POSTS_URL);
+      const res = await fetch(`${API_URL}/api/posts`);
       if (!res.ok) throw new Error('Failed to fetch posts');
       const data = await res.json();
-      // Sort newest first
-      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // newest first
       setPosts(data);
     } catch (e) {
       setError(e.message || 'Error fetching posts');
@@ -37,8 +31,7 @@ export default function App() {
   }, []);
 
   const handleCreate = async (post) => {
-    // 3. Use the consistent constant
-    const res = await fetch(POSTS_URL, {
+    const res = await fetch(`${API_URL}/api/posts`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(post)
@@ -52,8 +45,7 @@ export default function App() {
   };
 
   const handleUpdate = async (id, updates) => {
-    // 4. Use the consistent constant for specific post URL
-    const res = await fetch(`${POSTS_URL}/${id}`, {
+    const res = await fetch(`${API_URL}/api/posts/${id}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(updates)
@@ -66,8 +58,9 @@ export default function App() {
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this post?')) return;
-    // 5. Use the consistent constant for specific post URL
-    const res = await fetch(`${POSTS_URL}/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/api/posts/${id}`, {
+      method: 'DELETE'
+    });
     if (!res.ok) {
       alert('Failed to delete');
       return;
