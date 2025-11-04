@@ -3,9 +3,8 @@ import PostList from './components/PostList.jsx';
 import PostForm from './components/PostForm.jsx';
 
 // 1. DEFINE API CONSTANTS using the environment variable
-// In a production build, VITE_API_BASE_URL will be the full Render URL 
-// (e.g., 'https://sicat-facebookui-api.onrender.com').
-// In development, it will default to an empty string, allowing the relative path '/api/posts' to work with your Vite proxy.
+// VITE_API_BASE_URL will be 'https://sicat-facebookui-api.onrender.com' in production.
+// It will be an empty string in development, which lets your Vite proxy handle the routing.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const POSTS_URL = `${API_BASE_URL}/api/posts`;
 
@@ -53,7 +52,7 @@ export default function App() {
   };
 
   const handleUpdate = async (id, updates) => {
-    // 4. Use the consistent constant
+    // 4. Use the consistent constant for specific post URL
     const res = await fetch(`${POSTS_URL}/${id}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
@@ -67,7 +66,7 @@ export default function App() {
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this post?')) return;
-    // 5. Use the consistent constant
+    // 5. Use the consistent constant for specific post URL
     const res = await fetch(`${POSTS_URL}/${id}`, { method: 'DELETE' });
     if (!res.ok) {
       alert('Failed to delete');
