@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://sicat-facebookui.onrender.com/',
+        target: 'https://sicat-facebookui.onrender.com',
         changeOrigin: true,
         secure: false
       }
