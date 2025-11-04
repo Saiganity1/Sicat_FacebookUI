@@ -1,16 +1,19 @@
-// App.jsx
-
 import React, { useEffect, useState } from 'react';
 import PostList from './components/PostList.jsx';
 import PostForm from './components/PostForm.jsx';
 
-// 1. DEFINE API CONSTANTS
-// This will be the full URL in production and an empty string in development (due to proxy).
+// 1. DEFINE API CONSTANTS using the environment variable
+// In a production build, VITE_API_BASE_URL will be the full Render URL 
+// (e.g., 'https://sicat-facebookui-api.onrender.com').
+// In development, it will default to an empty string, allowing the relative path '/api/posts' to work with your Vite proxy.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const POSTS_URL = `${API_BASE_URL}/api/posts`;
 
 export default function App() {
-  // ... (state definitions)
+  const [posts, setPosts] = useState([]);
+  const [editing, setEditing] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -20,7 +23,9 @@ export default function App() {
       const res = await fetch(POSTS_URL);
       if (!res.ok) throw new Error('Failed to fetch posts');
       const data = await res.json();
-      // ... (sorting and setting posts)
+      // Sort newest first
+      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setPosts(data);
     } catch (e) {
       setError(e.message || 'Error fetching posts');
     } finally {
@@ -28,7 +33,9 @@ export default function App() {
     }
   };
 
-  // ... (useEffect remains the same)
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   const handleCreate = async (post) => {
     // 3. Use the consistent constant
@@ -37,7 +44,10 @@ export default function App() {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(post)
     });
-    // ...
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(txt || 'Create failed');
+    }
     const saved = await res.json();
     setPosts(prev => [saved, ...prev]);
   };
@@ -49,15 +59,58 @@ export default function App() {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(updates)
     });
-    // ...
+    if (!res.ok) throw new Error('Update failed');
+    const updated = await res.json();
+    setPosts(prev => prev.map(p => p.id === updated.id ? updated : p));
+    setEditing(null);
   };
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this post?')) return;
     // 5. Use the consistent constant
     const res = await fetch(`${POSTS_URL}/${id}`, { method: 'DELETE' });
-    // ...
+    if (!res.ok) {
+      alert('Failed to delete');
+      return;
+    }
+    setPosts(prev => prev.filter(p => p.id !== id));
   };
 
-  // ... (return statement)
+  return (
+    <div className="container">
+      <div className="header">
+        <h1>Facebook-like Posts</h1>
+        <div className="small-muted">Simple Vite + React UI</div>
+      </div>
+
+      <div className="card">
+        <h3 style={{marginTop:0}}>Create a post</h3>
+        <PostForm onSubmit={handleCreate} submitLabel="Post" />
+      </div>
+
+      {error && <div className="card" style={{borderLeft:'4px solid #ef4444', color:'#b91c1c'}}>{error}</div>}
+
+      {loading ? (
+        <div className="card small-muted">Loading posts...</div>
+      ) : (
+        <PostList
+          posts={posts}
+          onEdit={(p) => setEditing(p)}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {editing && (
+        <div className="card">
+          <h3>Edit post</h3>
+          <PostForm
+            initial={editing}
+            onSubmit={(updates) => handleUpdate(editing.id, updates)}
+            onCancel={() => setEditing(null)}
+            submitLabel="Save"
+          />
+        </div>
+      )}
+    </div>
+  );
 }
