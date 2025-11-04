@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import PostList from './components/PostList.jsx';
 import PostForm from './components/PostForm.jsx';
 
+// Define the API Base URL constant
+const API_BASE_URL = '/api/posts';
+
 export default function App() {
   const [posts, setPosts] = useState([]);
   const [editing, setEditing] = useState(null);
@@ -12,7 +15,8 @@ export default function App() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/posts');
+      // Use the constant
+      const res = await fetch(API_BASE_URL);
       if (!res.ok) throw new Error('Failed to fetch posts');
       const data = await res.json();
       // Sort newest first
@@ -30,7 +34,8 @@ export default function App() {
   }, []);
 
   const handleCreate = async (post) => {
-    const res = await fetch('/api/posts', {
+    // Use the constant
+    const res = await fetch(API_BASE_URL, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(post)
@@ -44,7 +49,8 @@ export default function App() {
   };
 
   const handleUpdate = async (id, updates) => {
-    const res = await fetch(`/api/posts/${id}`, {
+    // Use the constant to construct the URL
+    const res = await fetch(`${API_BASE_URL}/${id}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(updates)
@@ -57,7 +63,8 @@ export default function App() {
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this post?')) return;
-    const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+    // Use the constant to construct the URL
+    const res = await fetch(`${API_BASE_URL}/${id}`, { method: 'DELETE' });
     if (!res.ok) {
       alert('Failed to delete');
       return;
