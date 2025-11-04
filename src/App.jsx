@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PostList from './components/PostList.jsx';
 import PostForm from './components/PostForm.jsx';
 
-const API_URL = "https://sicat-facebookapi.onrender.com/api/posts"; // ✅ your backend URL
+const API_URL = "https://sicat-facebookapi.onrender.com"; // ✅ your backend URL
 
 export default function App() {
   const [posts, setPosts] = useState([]);
